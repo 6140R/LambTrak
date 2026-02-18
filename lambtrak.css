@@ -1,0 +1,105 @@
+/* LambTrak Mobile Styles */
+
+/* Global */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+/* Header & Layout */
+.lambtrak-header {
+    background: #2c3e50;
+    color: white;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.lambtrak-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 10px;
+}
+
+.offline-badge {
+    background-color: #e67e22;
+    color: white;
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Bootstrap Overrides */
+.form-control,
+.btn {
+    border-radius: 0.375rem;
+}
+
+.btn-success {
+    background-color: #27ae60;
+    border-color: #27ae60;
+}
+
+.btn-success:hover {
+    background-color: #219653;
+}
+
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background-color: #fff;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+}
+
+/* Modal Fix */
+.modal {
+    z-index: 1055;
+}
+
+/* Calendar Styles */
+.lambtrak-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-bottom: 1rem;
+}
+
+.calendar-day {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-height: 60px;
+    padding: 5px;
+    position: relative;
+    cursor: pointer;
+}
+
+.calendar-day.today {
+    border-color: #27ae60;
+    background-color: #f0fff4;
+}
+
+.calendar-day.has-events {
+    background-color: #e8f4fd;
+}
+
+.day-number {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.day-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    font-size: 0.75rem;
+}

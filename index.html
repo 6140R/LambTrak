@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>LambTrak Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <!-- Use the dedicated LambTrak styles -->
+    <link rel="stylesheet" href="lambtrak.css">
+    <style>
+        body {
+            background-image: url('background.jpg');
+            /* Replace with your image file */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;
+        }
+
+        /* Polyfill for Bootstrap 5 Offcanvas using Bootstrap 4 CSS */
+        .offcanvas {
+            position: fixed;
+            bottom: 0;
+            z-index: 1045;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+            visibility: hidden;
+            background-color: #fff;
+            background-clip: padding-box;
+            outline: 0;
+            transition: transform .3s ease-in-out;
+        }
+
+        .offcanvas-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1rem;
+        }
+
+        .offcanvas-body {
+            flex-grow: 1;
+            padding: 1rem 1rem;
+            overflow-y: auto;
+        }
+
+        .offcanvas-end {
+            top: 0;
+            right: 0;
+            width: 300px;
+            border-left: 1px solid rgba(0, 0, 0, .2);
+            transform: translateX(100%);
+        }
+
+        .offcanvas.show {
+            transform: none;
+            visibility: visible;
+        }
+
+        .offcanvas-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1040;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+        }
+
+        .offcanvas-backdrop.fade {
+            opacity: 0;
+        }
+
+        .offcanvas-backdrop.show {
+            opacity: .5;
+        }
+
+        /* Fix for close button in v4 CSS */
+        .btn-close {
+            box-sizing: content-box;
+            width: 1em;
+            height: 1em;
+            padding: .25em .25em;
+            color: #000;
+            background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+            border: 0;
+            border-radius: .25rem;
+            opacity: .5;
+        }
+
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.85);
+            z-index: -1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-overlay"></div>
+
+    <div class="lambtrak-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="m-0">LambTrak 🐑📱</h2>
+            <span class="offline-badge">Standalone Mode</span>
+        </div>
+        <button class="btn btn-sm btn-outline-light" type="button" data-bs-toggle="offcanvas"
+            data-bs-target="#menuOffcanvas">Menu</button>
+    </div>
+
+    <div class="lambtrak-container">
+        <!-- Running Totals -->
+        <div class="row g-2 mb-3">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body p-2">
+                        <h6 class="card-title text-center text-muted mb-2">Totals (<span id="totals-year"></span>)</h6>
+                        <div class="d-flex justify-content-around text-center">
+                            <div>
+                                <h4 id="total-ewes" class="text-info m-0">0</h4><small class="text-muted"
+                                    style="font-size:0.7rem">Ewes</small>
+                            </div>
+                            <div>
+                                <h4 id="total-lambs" class="text-success m-0">0</h4><small class="text-muted"
+                                    style="font-size:0.7rem">Born</small>
+                            </div>
+                            <div>
+                                <h4 id="total-living" class="text-primary m-0">0</h4><small class="text-muted"
+                                    style="font-size:0.7rem">Living</small>
+                            </div>
+                            <div>
+                                <h4 id="total-deaths" class="text-danger m-0">0</h4><small class="text-muted"
+                                    style="font-size:0.7rem">Deaths</small>
+                            </div>
+                            <div>
+                                <h4 id="total-assistance" class="text-warning m-0">0</h4><small class="text-muted"
+                                    style="font-size:0.7rem">Assisted</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Stats -->
+        <div class="row g-2 mb-3">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body p-2">
+                        <h6 class="card-title text-center text-muted mb-2">Performance</h6>
+                        <div class="d-flex justify-content-around text-center">
+                            <div>
+                                <h4 id="perf-lambing" class="text-info m-0">0%</h4><small class="text-muted"
+                                    style="font-size:0.7rem">Lambing %</small>
+                            </div>
+                            <div>
+                                <h4 id="perf-living" class="text-primary m-0">0%</h4><small class="text-muted"
+                                    style="font-size:0.7rem">Living %</small>
+                            </div>
+                            <div>
+                                <h4 id="perf-dead" class="text-danger m-0">0%</h4><small class="text-muted"
+                                    style="font-size:0.7rem">Dead %</small>
+                            </div>
+                            <div>
+                                <h4 id="perf-assisted" class="text-warning m-0">0%</h4><small class="text-muted"
+                                    style="font-size:0.7rem">Assisted %</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="d-flex justify-content-between mb-3 mt-4">
+            <button class="btn btn-primary w-100 me-2" data-bs-toggle="modal" data-bs-target="#addLambingModal">
+                + New Record
+            </button>
+        </div>
+
+        <!-- Search -->
+        <div class="mb-3">
+            <input type="text" id="search-input" class="form-control" placeholder="Search Ewe ID or Mark...">
+        </div>
+
+        <!-- Search Results -->
+        <div id="search-results-container" style="display:none;" class="mb-4">
+            <h5 class="mb-2">Search Results</h5>
+            <div id="search-results-list" class="list-group"></div>
+        </div>
+
+        <!-- Calendar View -->
+        <div id="calendar-view-container" class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                <button class="btn btn-sm btn-light" id="prev-month">&lt;</button>
+                <h5 class="m-0" id="current-month-label">Month Year</h5>
+                <button class="btn btn-sm btn-light" id="next-month">&gt;</button>
+            </div>
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between text-muted small mb-2 px-2">
+                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                </div>
+                <div id="calendar-grid" class="lambtrak-calendar"></div>
+            </div>
+        </div>
+
+        <!-- Daily Records List -->
+        <div id="daily-records-container" style="display:none;">
+            <h5 class="mb-2">Records for <span id="selected-date-label"></span></h5>
+            <div id="daily-records-list" class="list-group mb-4"></div>
+        </div>
+    </div>
+
+    <!-- Offcanvas Menu for Data Management -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="menuOffcanvas">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">Menu</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <h6>Data Management</h6>
+            <p class="small text-muted">Since this app runs offline, your data is stored in this browser. Use Backup to
+                save a copy.</p>
+            <button class="btn btn-outline-primary w-100 mb-2" id="backup-btn">📥 Download Backup (JSON)</button>
+            <button class="btn btn-outline-secondary w-100 mb-2" id="restore-btn-trigger">📤 Restore Backup</button>
+            <input type="file" id="restore-file-input" style="display:none" accept=".json">
+            <button class="btn btn-outline-success w-100 mb-2" id="export-csv-btn">📊 Export CSV</button>
+            <hr>
+            <h6>Cloud Sync</h6>
+            <p class="small text-muted">Upload your mobile records to the main GrazeTrak server.</p>
+            <div class="mb-2">
+                <label class="form-label small">GrazeTrak Server URL</label>
+                <input type="text" id="server-url-input" class="form-control form-control-sm"
+                    placeholder="e.g. http://192.168.1.50:8000">
+            </div>
+            <button class="btn btn-primary w-100 mb-2" id="upload-btn">☁️ Upload to GrazeTrak</button>
+            <hr>
+            <div class="alert alert-info small">
+                <strong>Tip:</strong> Add this page to your Home Screen to use it like a native app.
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Lambing Modal -->
+    <div class="modal fade" id="addLambingModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Record Lambing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="lambing-form">
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" id="lambing-date" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ewe ID</label>
+                            <input type="text" id="lambing-ewe" class="form-control" list="ewe-datalist" required
+                                placeholder="Select or type Ewe ID">
+                            <datalist id="ewe-datalist"></datalist>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sire ID (Optional)</label>
+                            <input type="text" id="lambing-sire" class="form-control" list="ram-datalist"
+                                placeholder="Select or type Sire ID">
+                            <datalist id="ram-datalist"></datalist>
+                        </div>
+
+                        <div class="row g-2 mb-1">
+                            <div class="col-4">
+                                <label class="form-label small mb-1">Male</label>
+                                <input type="number" id="lambing-male" class="form-control form-control-sm" value="0"
+                                    min="0">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small mb-1">Female</label>
+                                <input type="number" id="lambing-female" class="form-control form-control-sm" value="0"
+                                    min="0">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small mb-1">Dead</label>
+                                <input type="number" id="lambing-dead" class="form-control form-control-sm" value="0"
+                                    min="0">
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Lamb Details Section -->
+                        <div id="lamb-details-container" class="mb-3 p-2 bg-light rounded border" style="display:none;">
+                            <h6 class="small fw-bold mb-2">Lamb IDs & Weights</h6>
+                            <div id="lamb-fields-list"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Assistance Needed</label>
+                            <select id="lambing-assistance" class="form-select">
+                                <option value="None">None</option>
+                                <option value="Slight">Slight</option>
+                                <option value="Hard">Hard</option>
+                                <option value="Vet">Vet</option>
+                                <option value="Caesarean">Caesarean</option>
+                            </select>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Total Born</label>
+                                <input type="number" id="lambing-born" class="form-control" readonly value="0">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Scanned</label>
+                                <input type="number" id="lambing-scanned" class="form-control">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Comments</label>
+                            <textarea id="lambing-comments" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ID Mark</label>
+                            <input type="text" id="lambing-mark" class="form-control" placeholder="e.g. Blue Spray">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Photo</label>
+                            <input type="file" id="lambing-image" class="form-control" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Save Record</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="bootstrap.bundle.min.js"></script>
+    <script src="dexie.min.js"></script>
+    <!-- We use a specific mobile JS file -->
+    <script src="lambtrak_mobile.js"></script>
+</body>
+
+</html>
