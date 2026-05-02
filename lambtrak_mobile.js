@@ -551,6 +551,31 @@ function updateTotals(year) {
     const totalLiving = totalLambs - totalDeaths;
     const totalEwes = records.length;
 
+    let totalMales = 0;
+    let totalFemales = 0;
+    let singles = 0;
+    let twins = 0;
+    let triplets = 0;
+
+    records.forEach(r => {
+        let m = parseInt(r.male_lambs) || 0;
+        let f = parseInt(r.female_lambs) || 0;
+        
+        if (m === 0 && f === 0 && r.sex_distribution) {
+            const mMatch = r.sex_distribution.match(/(\d+)M/);
+            const fMatch = r.sex_distribution.match(/(\d+)F/);
+            if (mMatch) m = parseInt(mMatch[1]);
+            if (fMatch) f = parseInt(fMatch[1]);
+        }
+        totalMales += m;
+        totalFemales += f;
+
+        const born = parseInt(r.lambs_born) || 0;
+        if (born === 1) singles++;
+        else if (born === 2) twins++;
+        else if (born >= 3) triplets++;
+    });
+
     document.getElementById('total-lambs').textContent = totalLambs;
     document.getElementById('total-deaths').textContent = totalDeaths;
     document.getElementById('total-assistance').textContent = totalAssisted;
@@ -569,6 +594,27 @@ function updateTotals(year) {
     setPerf('perf-living', livingPct);
     setPerf('perf-dead', deadPct);
     setPerf('perf-assisted', assistedPct);
+
+    // Extended Performance Calculations
+    const totalSexed = totalMales + totalFemales;
+    const malePct = totalSexed > 0 ? ((totalMales / totalSexed) * 100).toFixed(1) : 0;
+
+    const elMales = document.getElementById('perf-males');
+    if (elMales) elMales.textContent = totalMales;
+    
+    const elFemales = document.getElementById('perf-females');
+    if (elFemales) elFemales.textContent = totalFemales;
+    
+    setPerf('perf-gender-ratio', malePct);
+
+    const elSingles = document.getElementById('perf-singles');
+    if (elSingles) elSingles.textContent = singles;
+    
+    const elTwins = document.getElementById('perf-twins');
+    if (elTwins) elTwins.textContent = twins;
+    
+    const elTriplets = document.getElementById('perf-triplets');
+    if (elTriplets) elTriplets.textContent = triplets;
 }
 
 function exportLambingCSV() {
