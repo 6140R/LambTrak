@@ -195,8 +195,11 @@
                             </div>
                         </div>
                         <hr class="my-2">
-                        <h6 class="card-title text-center text-muted mb-2">Litter Sizes</h6>
+                        <h6 class="card-title text-center text-muted mb-2">Litter Sizes (Living)</h6>
                         <div class="d-flex justify-content-around text-center">
+                            <div>
+                                <h4 id="perf-barren" class="text-secondary m-0">0</h4><small class="text-muted" style="font-size:0.7rem">Zero</small>
+                            </div>
                             <div>
                                 <h4 id="perf-singles" class="text-success m-0">0</h4><small class="text-muted" style="font-size:0.7rem">Singles</small>
                             </div>
@@ -373,7 +376,7 @@
 
     <script src="bootstrap.bundle.min.js"></script>
     <script src="dexie.min.js"></script>
-    <!-- We use a specific mobile JS file -->
+    <!-- We use a specific mobile JS file, appended with v=2 to bust cache -->
     <script src="lambtrak_mobile.js?v=2"></script>
 </body>
 

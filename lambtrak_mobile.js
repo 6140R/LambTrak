@@ -553,6 +553,7 @@ function updateTotals(year) {
 
     let totalMales = 0;
     let totalFemales = 0;
+    let barren = 0;
     let singles = 0;
     let twins = 0;
     let triplets = 0;
@@ -571,9 +572,13 @@ function updateTotals(year) {
         totalFemales += f;
 
         const born = parseInt(r.lambs_born) || 0;
-        if (born === 1) singles++;
-        else if (born === 2) twins++;
-        else if (born >= 3) triplets++;
+        const deaths = parseInt(r.deaths) || 0;
+        const living = born - deaths;
+        
+        if (living <= 0) barren++;
+        else if (living === 1) singles++;
+        else if (living === 2) twins++;
+        else if (living >= 3) triplets++;
     });
 
     document.getElementById('total-lambs').textContent = totalLambs;
@@ -606,6 +611,9 @@ function updateTotals(year) {
     if (elFemales) elFemales.textContent = totalFemales;
     
     setPerf('perf-gender-ratio', malePct);
+
+    const elBarren = document.getElementById('perf-barren');
+    if (elBarren) elBarren.textContent = barren;
 
     const elSingles = document.getElementById('perf-singles');
     if (elSingles) elSingles.textContent = singles;
